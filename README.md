@@ -38,12 +38,13 @@ Prezentácia (Projektový seminár 1): [Prezentácia](docs/presentation.pdf)
         - **Vulkan:** Veľmi nízkoúrovňový, preto ťažká implementácia.
         - **WebGL:** Zamerané na zobrazenie grafiky priamo v prehliadači, obmedzený výkon oproti novším technológiám, nepodporuje technológiu compute shader.
         - **WebGPU**: Nová technológia, ktorá nahradzuje WebGL, renderovanie grafiky priamo v prehliadači, neobmedzuje výkon, podporuje technológiu compute shader.
-        - **wgpu**: Priama implementácia WebGPU v jazyku Rust, umožňuje vytváranie **WebAssembly** (WASM) aplikácií.
+        - **wgpu**: Priama implementácia WebGPU v jazyku Rust.
 - [x] **Výber konečného riešenia pre implementáciu.**
-    - Rozhodli sme sa pre použitie **wgpu** s kompiláciou do **WebAssembly** (WASM). Kompilácia zabezpečená pomocou frameworku **eframe**. Hlavným výsledkom bude interaktívna webová aplikácia, pre používateľské rozhranie bola vybraná grafická knižnica **egui**.
+    - Rozhodli sme sa pre použitie **wgpu**. Pre používateľské rozhranie bola vybraná grafická knižnica **egui**.
 
 ### **17.03.2025 - 30.03.2025**
 - [x] **Implementácia základnej verzie aplikácie.**
+![image](images/app.png)
 
 ### **31.03.2025 - 13.04.2025**
 - [x] **Prehľad a výber vhodných vedeckých článkov.**
