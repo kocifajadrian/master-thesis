@@ -23,7 +23,7 @@ Prezentácia (Projektový seminár 2): [Prezentácia](docs/presentation.pdf)
 - [x] **Dokončenie implemetácia a experimentovanie so zobrazovaním.**
     - Implementácia používateľského rozhrania pomocou ImGui.
     - Interakcia s používateľským rozhraním a vizualizáciou.
-![image](images/app.png)
+    ![image](images/application.png)
 - [x] **Písanie práce.**
     - Východiska práce.
     - Výskumná časť práce.
