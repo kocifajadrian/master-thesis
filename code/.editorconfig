@@ -1,0 +1,6 @@
+[*.cs]
+dotnet_naming_rule.types_rule.symbols = types
+dotnet_naming_rule.types_rule.style = anything
+dotnet_naming_rule.types_rule.severity = none
+dotnet_naming_symbols.types.applicable_kinds = enum, struct, class, interface, namespace
+dotnet_naming_style.anything.capitalization = pascal_case

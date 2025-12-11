@@ -1,0 +1,6 @@
+﻿services:
+  mdfv.core:
+    image: mdfv.core
+    build:
+      context: .
+      dockerfile: MDFV.Core/Dockerfile

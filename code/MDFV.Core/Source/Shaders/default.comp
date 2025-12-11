@@ -1,0 +1,51 @@
+#version 460 core
+#define STORAGE_HELPER 32
+#define MAX_SLICES 64
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+
+layout(r32ui, binding = 0) uniform uimage3D out_texture;
+
+struct BoundingBox {
+    vec3 start;
+    float size;
+};
+
+uniform BoundingBox boundingBox;
+uniform int voxelResolution;
+uniform uint slicesCount;
+uniform float slices[MAX_SLICES];
+
+float gyroid(vec3 p, float w)
+{
+    return sin(p.x + w) * cos(p.y) + sin(p.y) * cos(p.z) * tan(w + p.z) + sin(p.z + w) * cos(p.x);
+}
+
+void main()
+{
+    uvec3 gid = gl_GlobalInvocationID;
+
+    if (gid.x >= uint(voxelResolution) || gid.y >= uint(voxelResolution) || gid.z >= uint(voxelResolution))
+    {
+        return;
+    }
+
+    vec3 position = boundingBox.start + vec3(gid) * (boundingBox.size / float(voxelResolution - 1));
+    float epsilon = 0.1;
+    uint uintX = gid.x / STORAGE_HELPER;
+    uint bitIndex = gid.x % STORAGE_HELPER;
+
+    for (uint ui = 0u; ui < slicesCount; ++ui)
+    {
+        float value = slices[ui];
+        uint voxel = (abs(gyroid(position, value)) < epsilon) ? 1u : 0u;
+
+        if (voxel == 0u)
+        {
+            continue;
+        }
+
+        int z = int(gid.z) + int(ui) * voxelResolution;
+        imageAtomicOr(out_texture, ivec3(uintX, gid.y, z), 1u << bitIndex);
+    }
+}

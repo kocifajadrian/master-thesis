@@ -1,0 +1,106 @@
+#version 460 core
+
+// Each workgroup size
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
+
+// 3D voxel output, 1 bit per voxel stored in 8-bit unsigned integer
+layout(r8ui, binding = 0) uniform uimage3D outputTex;
+
+struct BoundingBox {
+    vec3 start;
+    float size;
+};
+uniform BoundingBox boundingBox;
+
+// Volume / box parameters
+uniform int voxelResolution;                         // number of voxels per axis
+const float wSlice = 0.0;                       // 4th dimension slice
+
+// Example 4D function (replace with your own function)
+float myFunction(vec3 pos, float w)
+{
+    // Freaky 4D example
+    return (pos.x) * cos(pos.y) + sin(pos.z * w) - 0.5;
+}
+
+float gyroid4D(vec3 p, float w)
+{
+    return sin(p.x + w) * cos(p.y)
+    + sin(p.y + w) * cos(p.z)
+    + sin(p.z + w) * cos(p.x)
+    - 0.2;
+}
+
+// Sphere radius
+const float radius = 1.0;
+// Center of the sphere
+const vec3 center = vec3(0.0, 0.0, 0.0);
+
+
+float sphere(vec3 p, float w)
+{
+    // Standard sphere equation: |p - center|^2 <= r^2
+    return length(p - center) - radius;
+}
+
+float organicCells(vec3 p, float w)
+{
+    float s = sin(p.x * 3.0 + w)
+    + sin(p.y * 3.0 + w * 1.3)
+    + sin(p.z * 3.0 + w * 0.7);
+
+    float blend = cos(p.x * 2.0 + p.y + w);
+
+    return s * 0.5 + blend - 1.0;
+}
+
+// Gyroid parameters
+const float scale = 1.0;     // scale of the gyroid
+const float threshold = 1.0; // threshold to define surface
+
+float gyroid(vec3 p)
+{
+    // Apply scale
+    vec3 pos = p * scale;
+    return sin(pos.x) * cos(pos.y) + sin(pos.y) * cos(pos.z) + sin(pos.z) * cos(pos.x);
+}
+
+float heartFunction(vec3 pos) {
+    float x = pos.x;
+    float y = pos.y;
+    float z = pos.z;
+    float a = x*x + 9.0/4.0*y*y + z*z - 1.0;
+    float value = a*a*a - x*x*z*z*z - 9.0/80.0*y*y*z*z*z;
+    return value;
+}
+
+float myFunction2(vec3 pos, float w)
+{
+    // pos.x = x, pos.y = y, pos.z = z, w = 4th dimension
+    return pos.x * sin(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z)
+    + pos.y * cos(w) + pos.z;
+}
+
+float f(vec3 p) {
+    return p.x*p.x*p.x + p.y*p.y*p.y + p.z*p.z*p.z - (p.x + p.y + p.z);
+}
+
+void main()
+{
+    uvec3 gid = gl_GlobalInvocationID; // voxel index
+
+    if (gid.x >= voxelResolution || gid.y >= voxelResolution || gid.z >= voxelResolution)
+    return;
+
+    // Map voxel index to world coordinates
+    vec3 pos = boundingBox.start + vec3(gid) * ((boundingBox.size) / float(voxelResolution - 1));
+
+    // Evaluate function
+    // Evaluate gyroid function
+    float value = heartFunction(pos);
+
+    // Store as 1-bit voxel (1 if inside surface region, 0 otherwise)
+    float eps = 0.1;
+    uint voxel = (abs(gyroid(pos)) < eps) ? 1u : 0u;
+    imageStore(outputTex, ivec3(gid), uvec4(voxel, 0u, 0u, 0u));
+}
